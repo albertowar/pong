@@ -1,24 +1,15 @@
 #include <format>
 #include <iostream>
 #include <SDL2/SDL.h>
-
-const static int SCREEN_WIDTH = 640;
-const static int SCREEN_HEIGHT = 480;
+#include <SDL2/SDL2_gfxPrimitives.h>
+#include "ball.h"
+#include "constants.h"
 
 SDL_Window* window = nullptr;
 SDL_Renderer* renderer = nullptr;
 bool game_is_running = true;
 
-struct Ball {
-	float x;
-	float y;
-	float width;
-	float height;
-	float directionX;
-	float directionY;
-};
-
-Ball ball;
+Ball *ball;
 
 const static int FPS = 30;
 const static int FRAME_TARGET_TIME = 1000 / FPS;
@@ -55,12 +46,7 @@ bool initialize_window() {
 }
 
 void setup() {
-	ball.x = 20;
-	ball.y = 20;
-	ball.width = 15;
-	ball.height = 15;
-	ball.directionX = 1;
-	ball.directionY = 1;
+	ball = new Ball(20.0, 20.0, 10.0);
 }
 
 void process_input() {
@@ -89,16 +75,7 @@ void update() {
 
 	last_frame_time = SDL_GetTicks();
 
-	if (ball.x > (SCREEN_WIDTH - ball.width)|| ball.x < 0) {
-		ball.directionX *= -1;
-	}
-
-	if (ball.y > (SCREEN_HEIGHT - ball.height) || ball.y < 0) {
-		ball.directionY *= -1;
-	}
-
-	ball.x += ball.directionX * 80 * delta_time;
-	ball.y += ball.directionY * 120 * delta_time;
+	ball->update(delta_time);
 }
 
 void render() {
@@ -106,15 +83,7 @@ void render() {
 	SDL_RenderClear(renderer);
 
 	// Draw game objects
-	SDL_Rect ball_rect = {
-		ball.x,
-		ball.y,
-		ball.width,
-		ball.height
-	};
-
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-	SDL_RenderFillRect(renderer, &ball_rect);
+	filledCircleRGBA(renderer, ball -> x, ball -> y, ball -> radius, 255, 255, 255, 255);
 
 	SDL_RenderPresent(renderer);
 }
